@@ -2,6 +2,13 @@
 
 > 一个单文件、零依赖、数据驱动的人格测试网页引擎。换一份题库 JSON，就是一个新产品。
 
+<p align="center">
+  <a href="https://zachzhu091-star.github.io/quiz-webpage-generator/"><b>▶ 在线试玩 · 打工人人格（深色）</b></a>
+  &nbsp;|&nbsp;
+  <a href="https://zachzhu091-star.github.io/quiz-webpage-generator/animals.html">在线试玩 · 小动物人格（浅色）</a>
+</p>
+
+
 ![结果页预览](assets/preview-result.png)
 
 <p align="center">
@@ -250,6 +257,9 @@ my-quiz.html            42 KB，单文件
 ├── references/
 │   ├── topic-bank.md              选题库：5 大类 + 10 个圈层方向
 │   └── launch-checklist.md        部署、国内自测、上架定价、笔记文案
+├── docs/
+│   ├── index.html                 GitHub Pages 试玩页（打工人）
+│   └── animals.html               GitHub Pages 试玩页（小动物）
 └── .github/workflows/validate.yml 每次 push 自动校验两个示例页面
 ```
 
