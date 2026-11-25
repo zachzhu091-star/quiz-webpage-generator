@@ -1,0 +1,128 @@
+[
+  {
+    "name": "国风金",
+    "use": "历史人物、仙侠、诗词、古城、玄学类；默认配色",
+    "theme": {
+      "bg": "#100e16",
+      "bg2": "#241b30",
+      "ink": "#f5f0e6",
+      "muted": "#a79c93",
+      "accent": "#d3b170",
+      "accent2": "#8a6d3a",
+      "card": "#1a1522",
+      "bodyText": "#ded6cb",
+      "line": "rgba(255,255,255,.13)",
+      "surface": "rgba(255,255,255,.045)",
+      "surfaceHover": "rgba(211,177,112,.09)",
+      "accentSoft": "rgba(211,177,112,.12)",
+      "accentLine": "rgba(211,177,112,.34)",
+      "shadow": "0 30px 70px -40px #000",
+      "titleFont": "\"Songti SC\",\"STSong\",\"Noto Serif SC\",Georgia,serif"
+    }
+  },
+  {
+    "name": "奶油治愈",
+    "use": "小动物人格、生活节奏、情绪类、宠物、旅行搭子；浅色亲和",
+    "theme": {
+      "bg": "#fbf6ee",
+      "bg2": "#f4e6d2",
+      "ink": "#3a3226",
+      "muted": "#8a7d6b",
+      "accent": "#c08a3e",
+      "accent2": "#a9742c",
+      "card": "#fffdf8",
+      "bodyText": "#4a4238",
+      "line": "rgba(60,45,25,.12)",
+      "surface": "rgba(60,45,25,.035)",
+      "surfaceHover": "rgba(192,138,62,.12)",
+      "accentSoft": "rgba(192,138,62,.13)",
+      "accentLine": "rgba(192,138,62,.38)",
+      "shadow": "0 26px 60px -38px rgba(120,90,50,.45)",
+      "titleFont": "-apple-system,\"PingFang SC\",\"Noto Sans SC\",sans-serif"
+    }
+  },
+  {
+    "name": "樱花粉",
+    "use": "恋爱人格、情侣适配、理想恋爱剧本、少女向内容",
+    "theme": {
+      "bg": "#fff1f5",
+      "bg2": "#ffdde8",
+      "ink": "#4a2733",
+      "muted": "#a2778a",
+      "accent": "#e0608c",
+      "accent2": "#c4406b",
+      "card": "#fffafc",
+      "bodyText": "#59313f",
+      "line": "rgba(74,39,51,.12)",
+      "surface": "rgba(74,39,51,.035)",
+      "surfaceHover": "rgba(224,96,140,.12)",
+      "accentSoft": "rgba(224,96,140,.12)",
+      "accentLine": "rgba(224,96,140,.38)",
+      "shadow": "0 26px 60px -38px rgba(180,90,120,.42)",
+      "titleFont": "-apple-system,\"PingFang SC\",\"Noto Sans SC\",sans-serif"
+    }
+  },
+  {
+    "name": "赛博霓虹",
+    "use": "游戏玩家、二次元、赛博世界观、AI 主题、潮流向",
+    "theme": {
+      "bg": "#0a0a12",
+      "bg2": "#151233",
+      "ink": "#eaf6ff",
+      "muted": "#8f9bb3",
+      "accent": "#38e8ff",
+      "accent2": "#7b5cff",
+      "card": "#0f1022",
+      "bodyText": "#c6d4e2",
+      "line": "rgba(120,220,255,.18)",
+      "surface": "rgba(120,220,255,.06)",
+      "surfaceHover": "rgba(56,232,255,.12)",
+      "accentSoft": "rgba(56,232,255,.12)",
+      "accentLine": "rgba(56,232,255,.42)",
+      "shadow": "0 30px 70px -40px rgba(56,232,255,.35)",
+      "titleFont": "-apple-system,\"PingFang SC\",\"Noto Sans SC\",sans-serif"
+    }
+  },
+  {
+    "name": "午夜蓝",
+    "use": "职业天赋、大学生、打工人、商业/科技感较强的人格测试",
+    "theme": {
+      "bg": "#0d1522",
+      "bg2": "#17243a",
+      "ink": "#eaf0f7",
+      "muted": "#94a4b8",
+      "accent": "#7fb3f0",
+      "accent2": "#4a7fc1",
+      "card": "#111c2b",
+      "bodyText": "#c2cedc",
+      "line": "rgba(160,200,255,.16)",
+      "surface": "rgba(160,200,255,.055)",
+      "surfaceHover": "rgba(127,179,240,.12)",
+      "accentSoft": "rgba(127,179,240,.12)",
+      "accentLine": "rgba(127,179,240,.4)",
+      "shadow": "0 30px 70px -40px #000",
+      "titleFont": "-apple-system,\"PingFang SC\",\"Noto Sans SC\",sans-serif"
+    }
+  },
+  {
+    "name": "复古报纸",
+    "use": "复古、文学、老电影、年代身份、民国风",
+    "theme": {
+      "bg": "#f2ebdc",
+      "bg2": "#e7dcc6",
+      "ink": "#2f2a20",
+      "muted": "#7d7361",
+      "accent": "#9c5b2c",
+      "accent2": "#7a4620",
+      "card": "#faf5ea",
+      "bodyText": "#46402f",
+      "line": "rgba(47,42,32,.16)",
+      "surface": "rgba(47,42,32,.035)",
+      "surfaceHover": "rgba(156,91,44,.12)",
+      "accentSoft": "rgba(156,91,44,.12)",
+      "accentLine": "rgba(156,91,44,.36)",
+      "shadow": "0 24px 50px -36px rgba(90,70,40,.5)",
+      "titleFont": "\"Songti SC\",\"STSong\",\"Noto Serif SC\",Georgia,serif"
+    }
+  }
+]

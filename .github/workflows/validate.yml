@@ -1,0 +1,21 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate quiz data and result distribution
+        run: |
+          python3 scripts/validate_quiz.py assets/quiz-template.html --sims 6000
+          python3 scripts/validate_quiz.py assets/example-animal.html --sims 6000
+      - name: Check inline JS syntax
+        run: python3 scripts/check_syntax.py assets/*.html
