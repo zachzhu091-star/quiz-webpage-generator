@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#100e16">
+<meta name="description" content="趣味人格测试">
+<title>趣味人格测试</title>
+<style>
+/* ============ 主题变量：由下方 quiz-data 的 theme 字段运行时覆盖 ============ */
+:root{
+  --bg:#100e16;
+  --bg2:#241b30;
+  --ink:#f5f0e6;
+  --muted:#a79c93;
+  --accent:#d3b170;
+  --accent2:#8a6d3a;
+  --card:#1a1522;
+  --body-text:#ded6cb;
+  --line:rgba(255,255,255,.13);
+  --surface:rgba(255,255,255,.045);
+  --surface-hover:rgba(211,177,112,.09);
+  --accent-soft:rgba(211,177,112,.12);
+  --accent-line:rgba(211,177,112,.34);
+  --shadow:0 30px 70px -40px #000;
+  --radius:22px;
+  --font-title:"Songti SC","STSong","Noto Serif SC",Georgia,serif;
+  --font-body:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  line-height:1.65;
+  background-image:radial-gradient(120% 75% at 50% -12%,var(--bg2) 0%,var(--bg) 62%);
+  background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+}
+.app{position:relative;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px 44px;overflow:hidden}
+.orb{position:fixed;border-radius:50%;filter:blur(70px);opacity:.5;pointer-events:none;z-index:0}
+.orb-a{width:340px;height:340px;background:var(--accent2);top:-140px;right:-110px;opacity:.28}
+.orb-b{width:300px;height:300px;background:var(--accent);bottom:-160px;left:-120px;opacity:.14}
+.stage{position:relative;z-index:1;width:100%;max-width:640px}
+.view{display:none}
+.view.active{display:block;animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ============ 首页 ============ */
+.intro{text-align:center;padding:14px 6px 0}
+.badge{display:inline-block;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent-line);border-radius:999px;padding:6px 15px 5px;background:var(--accent-soft)}
+.title{font-family:var(--font-title);font-size:clamp(30px,8.4vw,44px);line-height:1.28;margin:22px 0 14px;font-weight:700;letter-spacing:.01em;text-wrap:balance}
+.lead{color:var(--muted);font-size:15px;margin:0 auto 26px;max-width:30em}
+.points{list-style:none;margin:0 auto 32px;padding:0;display:grid;gap:11px;max-width:26em;text-align:left}
+.points li{position:relative;padding-left:24px;font-size:14.5px;color:var(--body-text)}
+.points li::before{content:"";position:absolute;left:6px;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(211,177,112,.12)}
+.btn{font-family:inherit;font-size:16px;border:none;border-radius:999px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,opacity .18s ease}
+.btn.primary{
+  width:100%;max-width:340px;padding:17px 26px;color:#171320;font-weight:700;letter-spacing:.04em;
+  background:linear-gradient(135deg,var(--accent) 0%,#f0dcb0 52%,var(--accent) 100%);
+  box-shadow:0 14px 34px -14px var(--accent2),inset 0 1px 0 rgba(255,255,255,.5);
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+}
+.btn.primary:hover{transform:translateY(-2px);box-shadow:0 20px 40px -16px var(--accent2)}
+.btn.primary:active{transform:translateY(0) scale(.99)}
+.btn .arw{font-style:normal;transition:transform .2s ease}
+.btn.primary:hover .arw{transform:translateX(4px)}
+.fine{color:var(--muted);font-size:12px;opacity:.8;margin:18px 0 0;line-height:1.7}
+.center{text-align:center}
+
+/* ============ 答题 ============ */
+.qhead{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.ghost{background:none;border:1px solid var(--line);color:var(--muted);width:38px;height:38px;border-radius:50%;font-size:17px;line-height:1;cursor:pointer;transition:.2s;flex:none}
+.ghost:hover{color:var(--ink);border-color:rgba(255,255,255,.3)}
+.ghost[disabled]{opacity:.28;cursor:default}
+.qmeta{flex:1;display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;letter-spacing:.16em;color:var(--muted)}
+#q-count{font-variant-numeric:tabular-nums}
+.bar{height:4px;border-radius:999px;background:var(--line);overflow:hidden;margin-bottom:34px}
+.bar-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .42s cubic-bezier(.3,.8,.3,1)}
+.qbody{min-height:320px}
+.qbody.enter{animation:fadeIn .34s ease both}
+.qno{font-size:12px;letter-spacing:.2em;color:var(--accent);margin:0 0 12px;text-transform:uppercase;opacity:.9}
+.qtext{font-family:var(--font-title);font-size:clamp(21px,5.6vw,27px);line-height:1.48;font-weight:700;margin:0 0 26px;text-wrap:balance}
+.opts{display:grid;gap:11px}
+.opt{
+  display:flex;align-items:flex-start;gap:13px;width:100%;text-align:left;
+  background:var(--surface);border:1px solid var(--line);color:var(--ink);
+  border-radius:16px;padding:16px 17px;font-size:15.5px;font-family:inherit;line-height:1.5;
+  cursor:pointer;transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s;
+}
+.opt:hover{border-color:var(--accent-line);background:var(--surface-hover);transform:translateY(-1px)}
+.opt .key{
+  flex:none;width:23px;height:23px;border-radius:7px;border:1px solid var(--line);
+  display:grid;place-items:center;font-size:11.5px;color:var(--muted);margin-top:1px;transition:.16s
+}
+.opt:hover .key{color:var(--accent);border-color:var(--accent-line)}
+.opt .txt{flex:1}
+.opt.chosen{background:var(--accent-soft);border-color:var(--accent);box-shadow:0 8px 26px -16px var(--accent)}
+.opt.chosen .key{background:var(--accent);color:#171320;border-color:var(--accent);font-weight:700}
+.hint{color:var(--muted);font-size:12px;text-align:center;margin:26px 0 0;opacity:.65;letter-spacing:.03em}
+
+/* ============ 结果 ============ */
+.poster{
+  background:linear-gradient(168deg,var(--card) 0%,color-mix(in srgb,var(--card) 88%,#000) 100%);
+  border:1px solid var(--accent-line);
+  border-radius:26px;padding:30px 26px 24px;position:relative;overflow:hidden;
+  box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.poster::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(64% 42% at 50% 0%,var(--accent-soft),transparent 70%);
+}
+.poster > *{position:relative}
+.p-kicker{font-size:11.5px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+.p-emoji{font-size:52px;line-height:1;margin:16px 0 4px;display:block;filter:drop-shadow(0 8px 18px rgba(0,0,0,.4))}
+.p-name{font-family:var(--font-title);font-size:clamp(30px,7.6vw,38px);font-weight:700;line-height:1.24;margin:6px 0 12px;color:var(--accent);letter-spacing:.01em}
+.p-tag{display:inline-block;font-size:12.5px;letter-spacing:.08em;color:var(--ink);border:1px dashed var(--accent-line);border-radius:999px;padding:5px 14px}
+.p-match{display:flex;align-items:baseline;gap:6px;margin:18px 0 2px;font-family:var(--font-title)}
+.p-match b{font-size:40px;font-weight:700;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums}
+.p-match small{font-size:12px;color:var(--muted);letter-spacing:.12em}
+.p-quote{margin:16px 0 22px;padding:0 0 0 16px;border-left:2px solid var(--accent);font-size:16.5px;line-height:1.6;color:var(--ink);font-style:normal}
+.p-sec{border-top:1px solid var(--line);padding-top:15px;margin-top:15px}
+.p-sec h3{margin:0 0 8px;font-size:11.5px;letter-spacing:.2em;color:var(--accent);font-weight:600;text-transform:uppercase;font-family:var(--font-body)}
+.p-sec p{margin:0;font-size:14px;color:var(--body-text);line-height:1.72}
+.p-sec ul{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+.p-sec li{position:relative;padding-left:17px;font-size:14px;color:var(--body-text);line-height:1.62}
+.p-sec li::before{content:"";position:absolute;left:2px;top:.66em;width:5px;height:5px;border-radius:1px;transform:rotate(45deg);background:var(--accent);opacity:.85}
+.p-egg{margin-top:18px;padding:13px 15px;border-radius:13px;background:var(--accent-soft);border:1px solid var(--accent-line);font-size:13.5px;line-height:1.66;color:var(--body-text)}
+.p-egg b{color:var(--accent);font-weight:700;letter-spacing:.08em;margin-right:8px;font-size:11.5px}
+.p-foot{margin-top:20px;text-align:center;font-size:11px;color:var(--muted);opacity:.6;letter-spacing:.1em}
+.actions{display:grid;gap:10px;margin-top:20px}
+.actions .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn.ghost2{padding:14px 10px;background:var(--surface);border:1px solid var(--line);color:var(--ink);font-size:14.5px;border-radius:14px}
+.btn.ghost2:hover{background:var(--surface-hover);border-color:var(--accent-line)}
+.actions .btn.primary{max-width:none;width:100%;border-radius:14px;padding:16px 10px;font-size:15.5px}
+
+/* ============ toast ============ */
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translate(-50%,20px);
+  background:rgba(28,22,36,.96);border:1px solid var(--line);color:var(--ink);
+  padding:11px 22px;border-radius:999px;font-size:13.5px;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;z-index:99;backdrop-filter:blur(8px);white-space:nowrap;max-width:90vw
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:420px){
+  .poster{padding:26px 20px 20px}
+  .app{padding:24px 15px 36px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <main class="stage">
+
+    <!-- ========== 首页 ========== -->
+    <section class="view" id="v-intro" data-view="intro">
+      <div class="intro">
+        <span class="badge" id="i-badge">趣味人格测试</span>
+        <h1 class="title" id="i-title"></h1>
+        <p class="lead" id="i-sub"></p>
+        <ul class="points" id="i-points"></ul>
+        <button class="btn primary" id="btn-start"><span id="i-cta">开始测试</span><i class="arw">→</i></button>
+        <p class="fine" id="i-fine">仅供娱乐 · 无需登录 · 结果只在你手上</p>
+      </div>
+    </section>
+
+    <!-- ========== 答题 ========== -->
+    <section class="view" id="v-quiz" data-view="quiz">
+      <div class="qhead">
+        <button class="ghost" id="btn-prev" aria-label="上一题">←</button>
+        <div class="qmeta"><span id="q-count">01 / 20</span><span id="q-pct">0%</span></div>
+      </div>
+      <div class="bar"><div class="bar-fill" id="q-bar"></div></div>
+      <div class="qbody" id="q-body"></div>
+      <p class="hint">选一个最像你的，凭直觉，别想太久</p>
+    </section>
+
+    <!-- ========== 结果 ========== -->
+    <section class="view" id="v-result" data-view="result">
+      <div class="poster" id="poster">
+        <span class="p-kicker" id="r-kicker"></span>
+        <span class="p-emoji" id="r-emoji"></span>
+        <div class="p-name" id="r-name"></div>
+        <div><span class="p-tag" id="r-tag"></span></div>
+        <div class="p-match"><b id="r-pct">0</b><small>% 匹配</small></div>
+        <blockquote class="p-quote" id="r-quote"></blockquote>
+        <div class="p-sec"><h3>性格特点</h3><ul id="r-traits"></ul></div>
+        <div class="p-sec"><h3>匹配理由</h3><p id="r-match"></p></div>
+        <div class="p-sec"><h3>隐藏优势</h3><p id="r-edge"></p></div>
+        <div class="p-egg"><b>彩蛋</b><span id="r-egg"></span></div>
+        <div class="p-foot">仅供娱乐 · 不构成任何专业评估</div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="btn-save">保存结果海报</button>
+        <div class="row">
+          <button class="btn ghost2" id="btn-copy">复制文案</button>
+          <button class="btn ghost2" id="btn-again">再测一次</button>
+        </div>
+      </div>
+      <p class="fine center">分享给朋友，看看 TA 是什么人格</p>
+    </section>
+
+  </main>
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- ============================================================
+     题库数据：换主题只需改这一段（严格 JSON，勿加注释/尾逗号）
+     meta / theme / questions / results 四个字段缺一不可
+     ============================================================ -->
+<script type="application/json" id="quiz-data">
+{
+  "meta": {
+    "badge": "小动物人格测试",
+    "title": "测测你是哪只小动物",
+    "subtitle": "同一间办公室，有人是狼，有人是熊猫。15 道题，看看你骨子里住着谁。",
+    "points": [
+      "15 道题，1 分钟测完",
+      "6 种小动物人格，附专属相处说明",
+      "结果可存成海报，发群里看看谁是熊猫"
+    ],
+    "cta": "开始测试",
+    "fine": "仅供娱乐 · 无需登录 · 结果只在你手上"
+  },
+  "theme": {
+    "bg": "#fbf6ee",
+    "bg2": "#f4e6d2",
+    "ink": "#3a3226",
+    "muted": "#8a7d6b",
+    "accent": "#c08a3e",
+    "accent2": "#a9742c",
+    "card": "#fffdf8",
+    "bodyText": "#4a4238",
+    "line": "rgba(60,45,25,.12)",
+    "surface": "rgba(60,45,25,.035)",
+    "surfaceHover": "rgba(192,138,62,.12)",
+    "accentSoft": "rgba(192,138,62,.13)",
+    "accentLine": "rgba(192,138,62,.38)",
+    "shadow": "0 26px 60px -38px rgba(120,90,50,.45)",
+    "titleFont": "-apple-system,\"PingFang SC\",\"Noto Sans SC\",sans-serif"
+  },
+  "questions": [
+    {
+      "q": "周末最理想的下午是——",
+      "options": [
+        {
+          "t": "约人逛街喝茶，聊到天黑",
+          "s": {
+            "dog": 2,
+            "fox": 1
+          }
+        },
+        {
+          "t": "在家睡到自然醒，然后发一下午呆",
+          "s": {
+            "panda": 2
+          }
+        },
+        {
+          "t": "一个人去咖啡店看书、画画",
+          "s": {
+            "cat": 2
+          }
+        },
+        {
+          "t": "出门跑步爬山，把体力用完",
+          "s": {
+            "wolf": 2
+          }
+        }
+      ]
+    },
+    {
+      "q": "朋友临时取消约好的饭局，你会——",
+      "options": [
+        {
+          "t": "马上约别人，不能让今晚空着",
+          "s": {
+            "dog": 2
+          }
+        },
+        {
+          "t": "太好了，正好回家躺着",
+          "s": {
+            "panda": 2
+          }
+        },
+        {
+          "t": "回一句「没事」，心里记一笔",
+          "s": {
+            "fox": 1,
+            "cat": 1
+          }
+        },
+        {
+          "t": "直接问：是不是有什么事",
+          "s": {
+            "wolf": 1,
+            "dog": 1
+          }
+        }
+      ]
+    },
+    {
+      "q": "新到一个群或团队，你最先做的事是——",
+      "options": [
+        {
+          "t": "看谁说了算、谁跟谁熟",
+          "s": {
+            "fox": 2
+          }
+        },
+        {
+          "t": "主动打招呼，把名字都记住",
+          "s": {
+            "dog": 2
+          }
+        },
+        {
+          "t": "找个角落坐下，先不吭声",
+          "s": {
+            "turtle": 2
+          }
+        },
+        {
+          "t": "看看哪里能帮上忙，先做出点东西",
+          "s": {
+            "wolf": 2
+          }
+        }
+      ]
+    },
+    {
+      "q": "有人插队，你会——",
+      "options": [
+        {
+          "t": "直接说「请排队」",
+          "s": {
+            "wolf": 2
+          }
+        },
+        {
+          "t": "心里不爽，但算了",
+          "s": {
+            "turtle": 2,
+            "panda": 1
+          }
+        },
+        {
+          "t": "用开玩笑的方式让他不好意思",
+          "s": {
+            "fox": 2
+          }
+        },
+        {
+          "t": "假装没看见，站远一点",
+          "s": {
+            "cat": 2
+          }
+        }
+      ]
+    },
+    {
+      "q": "你手机相册里最多的是——",
+      "options": [
+        {
+          "t": "朋友合照和聊天截图",
+          "s": {
+            "dog": 2
+          }
+        },
+        {
+          "t": "风景、猫、路上随手拍",
+          "s": {
+            "cat": 2
+          }
+        },
+        {
+          "t": "工作截图、表格、待办",
+          "s": {
+            "wolf": 2
+          }
+        },
+        {
+          "t": "表情包和别人的丑照",
+          "s": {
+            "fox": 2
+          }
+        }
+      ]
+    },
+    {
+      "q": "加班到很晚，第二天你会——",
+      "options": [
+        {
+          "t": "照常早起，把落下的补回来",
+          "s": {
+            "wolf": 2
+          }
+        },
+        {
+          "t": "请半天假，睡够了再去",
+          "s": {
+            "panda": 2
+          }
+        },
+        {
+          "t": "嘴上答应早到，实际准点到",
+          "s": {
+            "fox": 2
+          }
+        },
+        {
+          "t": "早早到，把工位收拾干净",
+          "s": {
+            "turtle": 1,
+            "dog": 1
+          }
+        }
+      ]
+    },
+    {
+      "q": "你的房间通常——",
+      "options": [
+        {
+          "t": "东西各就各位，乱一点就难受",
+          "s": {
+            "turtle": 2
+          }
+        },
+        {
+          "t": "东西堆着，但我知道东西在哪",
+          "s": {
+            "panda": 2
+          }
+        },
+        {
+          "t": "干净，但没什么装饰",
+          "s": {
+            "cat": 2
+          }
+        },
+        {
+          "t": "有很多照片、明信片和小摆件",
+          "s": {
+            "dog": 2
+          }
+        }
+      ]
+    },
+    {
+      "q": "聚会里你多半是——",
+      "options": [
+        {
+          "t": "张罗的人：点菜、拍照、结账",
+          "s": {
+            "dog": 2
+          }
+        },
+        {
+          "t": "和谁都聊得起来，但不深聊",
+          "s": {
+            "fox": 2
+          }
+        },
+        {
+          "t": "坐一会儿就想走",
+          "s": {
+            "cat": 2
+          }
+        },
+        {
+          "t": "提前到、帮忙搬椅子",
+          "s": {
+            "turtle": 1,
+            "wolf": 1
+          }
+        }
+      ]
+    },
+    {
+      "q": "遇到不会做的事，你第一反应是——",
+      "options": [
+        {
+          "t": "先自己搜，搜不到再问",
+          "s": {
+            "wolf": 2
+          }
+        },
+        {
+          "t": "找最靠谱的那个人问",
+          "s": {
+            "fox": 1,
+            "dog": 1
+          }
+        },
+        {
+          "t": "先放着，也许不用做",
+          "s": {
+            "panda": 2
+          }
+        },
+        {
+          "t": "慢慢试，总能试出来",
+          "s": {
+            "turtle": 2
+          }
+        }
+      ]
+    },
+    {
+      "q": "你最受不了别人——",
+      "options": [
+        {
+          "t": "说话不算数",
+          "s": {
+            "wolf": 2,
+            "dog": 1
+          }
+        },
+        {
+          "t": "当众让你下不来台",
+          "s": {
+            "cat": 2
+          }
+        },
+        {
+          "t": "一直催你",
+          "s": {
+            "panda": 2
+          }
+        },
+        {
+          "t": "装熟、套近乎",
+          "s": {
+            "turtle": 2
+          }
+        }
+      ]
+    },
+    {
+      "q": "旅行时你的角色是——",
+      "options": [
+        {
+          "t": "做攻略、订酒店、算预算",
+          "s": {
+            "wolf": 2
+          }
+        },
+        {
+          "t": "拍照、找吃的、跟当地人聊天",
+          "s": {
+            "fox": 2
+          }
+        },
+        {
+          "t": "跟着走，不发表意见",
+          "s": {
+            "turtle": 2
+          }
+        },
+        {
+          "t": "到地方先睡一觉",
+          "s": {
+            "panda": 2
+          }
+        }
+      ]
+    },
+    {
+      "q": "别人夸你，你会——",
+      "options": [
+        {
+          "t": "大方接受，顺便夸回去",
+          "s": {
+            "fox": 2
+          }
+        },
+        {
+          "t": "有点不好意思，说「没有没有」",
+          "s": {
+            "turtle": 2
+          }
+        },
+        {
+          "t": "心里美，脸上没表情",
+          "s": {
+            "cat": 2
+          }
+        },
+        {
+          "t": "认真讲这件事是怎么做成的",
+          "s": {
+            "wolf": 1,
+            "dog": 1
+          }
+        }
+      ]
+    },
+    {
+      "q": "深夜 emo 的时候，你会——",
+      "options": [
+        {
+          "t": "给朋友发消息，聊到睡着",
+          "s": {
+            "dog": 2
+          }
+        },
+        {
+          "t": "一个人待着，第二天就好了",
+          "s": {
+            "cat": 2
+          }
+        },
+        {
+          "t": "起来干活，把情绪变成进度",
+          "s": {
+            "wolf": 2
+          }
+        },
+        {
+          "t": "吃点东西，然后睡",
+          "s": {
+            "panda": 2
+          }
+        }
+      ]
+    },
+    {
+      "q": "你希望别人怎么形容你——",
+      "options": [
+        {
+          "t": "靠谱",
+          "s": {
+            "turtle": 2,
+            "wolf": 1
+          }
+        },
+        {
+          "t": "有意思",
+          "s": {
+            "fox": 2
+          }
+        },
+        {
+          "t": "温柔",
+          "s": {
+            "dog": 2
+          }
+        },
+        {
+          "t": "有自己的世界",
+          "s": {
+            "cat": 2
+          }
+        }
+      ]
+    },
+    {
+      "q": "如果生活能重来一次，你会——",
+      "options": [
+        {
+          "t": "早点开始做想做的事",
+          "s": {
+            "wolf": 2
+          }
+        },
+        {
+          "t": "多陪陪重要的人",
+          "s": {
+            "dog": 2
+          }
+        },
+        {
+          "t": "少在意别人的看法",
+          "s": {
+            "cat": 2
+          }
+        },
+        {
+          "t": "什么都不改，挺好的",
+          "s": {
+            "panda": 2
+          }
+        }
+      ]
+    }
+  ],
+  "results": [
+    {
+      "id": "fox",
+      "name": "机敏狐狸",
+      "emoji": "🦊",
+      "tag": "人还没到，信息先到",
+      "quote": "「先把人搞明白，事就好办了。」",
+      "traits": [
+        "读空气比读文件快，一眼看出谁在演",
+        "说话留三分，玩笑里带信息",
+        "不喜欢硬碰硬，喜欢绕过去"
+      ],
+      "match": "你在任何场合都能找到自己的位置。比起规则，你更相信关系和时机，而这两样你都不缺。",
+      "edge": "极高的社交嗅觉和分寸感——你能让一群互相看不顺眼的人坐到一张桌子上。",
+      "egg": "你嘴上说「随便」，其实方案早在心里排好了。偶尔也让别人猜一猜你。"
+    },
+    {
+      "id": "turtle",
+      "name": "稳当乌龟",
+      "emoji": "🐢",
+      "tag": "慢，但从不出错",
+      "quote": "「不急，这事我一步一步来。」",
+      "traits": [
+        "答应的事一定有回音，交期从来不打折",
+        "不喜欢被催，越催越慢",
+        "习惯把风险想在前面"
+      ],
+      "match": "你不抢风头，但你是那个让计划真正落地的人。别人换三版想法，你交第一版就能用。",
+      "edge": "极强的稳定性和耐心——长期项目里，你是最稀缺的那种人。",
+      "egg": "你看起来什么都不争，其实心里门儿清。你只是不想为不值得的事加速。"
+    },
+    {
+      "id": "wolf",
+      "name": "独狼",
+      "emoji": "🐺",
+      "tag": "目标写在脸上，不写在嘴上",
+      "quote": "「别解释，先做出来。」",
+      "traits": [
+        "讨厌无效会议和绕圈子",
+        "一个人也能把事推到终点",
+        "标准高，对自己更狠"
+      ],
+      "match": "你不太需要陪伴，你需要进展。给你一个目标和一个不被打扰的下午，你能交出整个方案。",
+      "edge": "极强的驱动力和判断力——你能在没人相信的时候，自己先把路走出来。",
+      "egg": "你偶尔也想有人问一句「累不累」。只是你从不说，别人也不敢问。"
+    },
+    {
+      "id": "cat",
+      "name": "我行我素的猫",
+      "emoji": "🐱",
+      "tag": "在我自己的节奏里",
+      "quote": "「我可以配合，但别指望我融入。」",
+      "traits": [
+        "边界感强，讨厌被安排",
+        "独处是充电，不是逃避",
+        "对熟人话很多，对生人零输出"
+      ],
+      "match": "你有自己的一套运行系统，别人进不来也不影响你运转。你不是冷漠，是选择性投入。",
+      "edge": "极强的自我一致性——你很少被环境改变，这让你在噪音里格外清醒。",
+      "egg": "你嘴上说「随便」，其实已经在心里把桌子掀了一遍。"
+    },
+    {
+      "id": "dog",
+      "name": "热心小狗",
+      "emoji": "🐶",
+      "tag": "谁有事都先想到你",
+      "quote": "「你等我一下，我马上来。」",
+      "traits": [
+        "对别人的情绪格外敏感",
+        "答应的事比自己事还上心",
+        "不太会拒绝，常常排到最后"
+      ],
+      "match": "你是那种「有他在就安心」的人。别人记住你的不是能力，是你带来的温度。",
+      "edge": "极强的连接力和信任感——你走到哪里，都有人愿意帮你。",
+      "egg": "你对所有人都好，唯独对自己将就。今天可以先照顾一下自己。"
+    },
+    {
+      "id": "panda",
+      "name": "松弛熊猫",
+      "emoji": "🐼",
+      "tag": "天塌了先睡一觉",
+      "quote": "「急也没用，先吃饭吧。」",
+      "traits": [
+        "情绪稳定得离谱，几乎不内耗",
+        "讨厌被卷进无意义的竞争",
+        "关键时刻意外靠谱"
+      ],
+      "match": "你把力气花在真正在意的事上，其余一律省电模式。别人以为你躺，其实你在蓄力。",
+      "edge": "极强的抗压和节能能力——你是那种越乱越稳，还能顺便安慰别人的人。",
+      "egg": "你不着急，是因为你早就想明白了：大部分事，明天再说也一样。"
+    }
+  ]
+}
+</script>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- 数据 ---------- */
+  var DATA;
+  try{
+    DATA = JSON.parse(document.getElementById('quiz-data').textContent);
+  }catch(e){
+    document.body.innerHTML = '<pre style="padding:24px;color:#f88;white-space:pre-wrap">quiz-data JSON 解析失败：\n' + e.message + '</pre>';
+    return;
+  }
+  var QS = DATA.questions, RS = DATA.results;
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+  /* ---------- 主题 ---------- */
+  (function applyTheme(){
+    var t = DATA.theme || {};
+    var map = {bg:'--bg', bg2:'--bg2', ink:'--ink', muted:'--muted', accent:'--accent', accent2:'--accent2',
+               card:'--card', bodyText:'--body-text', line:'--line', surface:'--surface',
+               surfaceHover:'--surface-hover', accentSoft:'--accent-soft', accentLine:'--accent-line',
+               shadow:'--shadow'};
+    Object.keys(map).forEach(function(k){
+      if(t[k]) document.documentElement.style.setProperty(map[k], t[k]);
+    });
+    if(t.titleFont) document.documentElement.style.setProperty('--font-title', t.titleFont);
+    if(t.bodyFont) document.documentElement.style.setProperty('--font-body', t.bodyFont);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if(meta && t.bg) meta.setAttribute('content', t.bg);
+  })();
+
+  /* ---------- 首页文案 ---------- */
+  var m = DATA.meta || {};
+  document.title = m.title || '趣味人格测试';
+  var desc = document.querySelector('meta[name="description"]');
+  if(desc && m.subtitle) desc.setAttribute('content', m.subtitle);
+  $('#i-badge').textContent = m.badge || '趣味人格测试';
+  $('#i-title').textContent = m.title || '';
+  $('#i-sub').textContent = m.subtitle || '';
+  $('#i-cta').textContent = m.cta || '开始测试';
+  if(m.fine) $('#i-fine').textContent = m.fine;
+  var iPoints = $('#i-points');
+  (m.points || []).forEach(function(p){
+    var li = document.createElement('li');
+    li.textContent = p;
+    iPoints.appendChild(li);
+  });
+
+  /* ---------- 状态 ---------- */
+  var idx = 0;
+  var answers = new Array(QS.length).fill(null);
+  var locked = false;
+  var lastResult = null;
+
+  function show(name){
+    $$('.view').forEach(function(v){
+      v.classList.toggle('active', v.dataset.view === name);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function toast(msg){
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ t.classList.remove('on'); }, 2000);
+  }
+
+  /* ---------- 渲染一道题 ---------- */
+  function renderQuestion(){
+    var q = QS[idx];
+    var n = QS.length;
+    $('#q-count').textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0');
+    var done = answers.filter(function(a){ return a !== null; }).length;
+    $('#q-pct').textContent = Math.round(done / n * 100) + '%';
+    $('#q-bar').style.width = (done / n * 100) + '%';
+    $('#btn-prev').disabled = idx === 0;
+
+    var body = $('#q-body');
+    body.innerHTML = '';
+    var no = document.createElement('p');
+    no.className = 'qno';
+    no.textContent = 'Question ' + (idx + 1);
+    var qt = document.createElement('h2');
+    qt.className = 'qtext';
+    qt.textContent = q.q;
+    var opts = document.createElement('div');
+    opts.className = 'opts';
+
+    q.options.forEach(function(o, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opt' + (answers[idx] === i ? ' chosen' : '');
+      b.innerHTML = '<span class="key">' + 'ABCD'[i] + '</span><span class="txt"></span>';
+      b.querySelector('.txt').textContent = o.t;
+      b.addEventListener('click', function(){ choose(i); });
+      opts.appendChild(b);
+    });
+
+    body.appendChild(no);
+    body.appendChild(qt);
+    body.appendChild(opts);
+    body.classList.remove('enter');
+    void body.offsetWidth;
+    body.classList.add('enter');
+  }
+
+  function choose(i){
+    if(locked) return;
+    locked = true;
+    answers[idx] = i;
+    var btns = $$('#q-body .opt');
+    btns.forEach(function(b, k){ b.classList.toggle('chosen', k === i); });
+    var done = answers.filter(function(a){ return a !== null; }).length;
+    $('#q-pct').textContent = Math.round(done / QS.length * 100) + '%';
+    $('#q-bar').style.width = (done / QS.length * 100) + '%';
+
+    setTimeout(function(){
+      locked = false;
+      if(idx < QS.length - 1){ idx++; renderQuestion(); }
+      else { finish(); }
+    }, 320);
+  }
+
+  /* ---------- 计分 ---------- */
+  // 累加权重；并列时用"最近 6 题的倾向"打破（更接近直觉），仍并列才按 results 顺序
+  function computeScore(){
+    var total = {}, recent = {};
+    RS.forEach(function(r){ total[r.id] = 0; recent[r.id] = 0; });
+    var from = Math.max(0, answers.length - 6);
+    answers.forEach(function(ai, qi){
+      if(ai === null) return;
+      var s = (QS[qi].options[ai] || {}).s || {};
+      Object.keys(s).forEach(function(k){
+        total[k] = (total[k] || 0) + s[k];
+        if(qi >= from) recent[k] = (recent[k] || 0) + s[k];
+      });
+    });
+    var ranked = RS.map(function(r, i){
+      return { id: r.id, score: total[r.id] || 0, rec: recent[r.id] || 0, order: i };
+    }).sort(function(a, b){
+      return b.score - a.score || b.rec - a.rec || a.order - b.order;
+    });
+    var best = ranked[0], second = ranked[1] || { score: 0 };
+    var pct = 72;
+    if(best.score > 0){
+      pct = Math.round(72 + 27 * (1 - (second.score || 0) / best.score));
+    }
+    pct = Math.max(72, Math.min(99, pct));
+    return { result: RS[best.order], pct: pct, table: total, ranked: ranked };
+  }
+
+  /* ---------- 结果页 ---------- */
+  function finish(){
+    var r = computeScore();
+    lastResult = r;
+    var d = r.result;
+    $('#r-kicker').textContent = m.title || '';
+    $('#r-emoji').textContent = d.emoji || '✨';
+    $('#r-name').textContent = d.name || '';
+    $('#r-tag').textContent = d.tag || '';
+    $('#r-pct').textContent = r.pct;
+    $('#r-quote').textContent = d.quote || '';
+    var ul = $('#r-traits');
+    ul.innerHTML = '';
+    (d.traits || []).forEach(function(t){
+      var li = document.createElement('li');
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+    $('#r-match').textContent = d.match || '';
+    $('#r-edge').textContent = d.edge || '';
+    $('#r-egg').textContent = d.egg || '';
+    $('#r-traits').parentElement.style.display = (d.traits && d.traits.length) ? '' : 'none';
+    show('result');
+    if(window.HERMES_TEST) window.HERMES_TEST.last = r;
+  }
+
+  /* ---------- 海报 ---------- */
+  function rgba(hex, a){
+    var h = String(hex || '').replace('#', '');
+    if(h.length === 3) h = h.split('').map(function(c){ return c + c; }).join('');
+    if(h.length !== 6 || /[^0-9a-f]/i.test(h)) return 'rgba(211,177,112,' + a + ')';
+    var n = parseInt(h, 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+  }
+  function roundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+  // 中文断行：行首不放标点，超行数补省略号
+  function wrapLines(ctx, text, maxW, maxLines){
+    var NO_LEAD = '。，、；：！？）」』”’%';
+    var chars = String(text || '').split('');
+    var lines = [], line = '';
+    for(var i = 0; i < chars.length; i++){
+      var c = chars[i];
+      if(c === '\n'){ lines.push(line); line = ''; continue; }
+      if(!line && c === ' ') continue;
+      var test = line + c;
+      if(line && ctx.measureText(test).width > maxW){
+        if(NO_LEAD.indexOf(c) >= 0){ lines.push(line + c); line = ''; }
+        else { lines.push(line); line = c; }
+      }else{ line = test; }
+    }
+    if(line) lines.push(line);
+    if(maxLines && lines.length > maxLines){
+      lines = lines.slice(0, maxLines);
+      lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…';
+    }
+    return lines;
+  }
+
+  // 只画文字内容（不画背景/边框），返回内容结束的 y，便于两遍法垂直居中
+  function paintContent(ctx, W, top){
+    var t = DATA.theme || {};
+    var accent = t.accent || '#d3b170';
+    var ink = t.ink || '#f5f0e6';
+    var muted = t.muted || '#a79c93';
+    var bodyText = t.bodyText || '#d9d1c6';
+    var fontBody = '"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif';
+    var fontTitle = '"Songti SC","STSong","Noto Serif SC",Georgia,serif';
+    var d = lastResult.result;
+    var x = 68, maxW = W - 136, y = top;
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = muted;
+    ctx.font = '500 20px ' + fontBody;
+    ctx.fillText((DATA.meta && DATA.meta.title) || '', x, y);
+
+    /* emoji */
+    y += 96;
+    ctx.font = '70px ' + fontBody + ',"Apple Color Emoji","Segoe UI Emoji"';
+    ctx.fillText(d.emoji || '✨', x - 4, y);
+
+    /* 名称 */
+    y += 72;
+    ctx.fillStyle = accent;
+    ctx.font = '700 58px ' + fontTitle;
+    wrapLines(ctx, d.name, maxW, 2).forEach(function(l){ ctx.fillText(l, x, y); y += 70; });
+
+    /* 标签 */
+    y += 8;
+    ctx.fillStyle = rgba(ink, 0.72);
+    ctx.font = '400 24px ' + fontBody;
+    wrapLines(ctx, d.tag, maxW, 2).forEach(function(l){ ctx.fillText(l, x, y); y += 36; });
+
+    /* 匹配度 */
+    y += 62;
+    ctx.fillStyle = ink;
+    ctx.font = '700 74px ' + fontTitle;
+    var pt = String(lastResult.pct);
+    ctx.fillText(pt, x, y);
+    var pw = ctx.measureText(pt).width;
+    ctx.fillStyle = muted;
+    ctx.font = '500 21px ' + fontBody;
+    ctx.fillText('% MATCH', x + pw + 14, y - 12);
+
+    /* 金句 */
+    y += 52;
+    ctx.font = '400 27px ' + fontBody;
+    var ql = wrapLines(ctx, d.quote, maxW - 34, 3);
+    ctx.fillStyle = accent;
+    ctx.fillRect(x, y - 26, 3, ql.length * 42 + 4);
+    ctx.fillStyle = ink;
+    ql.forEach(function(l){ ctx.fillText(l, x + 24, y); y += 42; });
+    y += 26;
+
+    /* 分隔线 */
+    ctx.strokeStyle = rgba(ink, 0.16);
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(W - x, y); ctx.stroke();
+    y += 50;
+
+    /* 性格特点 */
+    if(d.traits && d.traits.length){
+      ctx.fillStyle = accent;
+      ctx.font = '600 19px ' + fontBody;
+      ctx.fillText('性 格 特 点', x, y);
+      y += 42;
+      ctx.font = '400 25px ' + fontBody;
+      d.traits.slice(0, 3).forEach(function(tr){
+        var rows = wrapLines(ctx, tr, maxW - 22, 2);
+        ctx.fillStyle = accent;
+        ctx.fillText('·', x, y - 1);
+        ctx.fillStyle = bodyText;
+        rows.forEach(function(l){ ctx.fillText(l, x + 20, y); y += 37; });
+        y += 10;
+      });
+      y += 22;
+    }
+
+    /* 隐藏优势 */
+    if(d.edge){
+      ctx.fillStyle = accent;
+      ctx.font = '600 19px ' + fontBody;
+      ctx.fillText('隐 藏 优 势', x, y);
+      y += 42;
+      ctx.fillStyle = bodyText;
+      ctx.font = '400 25px ' + fontBody;
+      wrapLines(ctx, d.edge, maxW, 4).forEach(function(l){ ctx.fillText(l, x, y); y += 37; });
+      y += 34;
+    }
+
+    /* 彩蛋 */
+    if(d.egg){
+      ctx.font = '400 24px ' + fontBody;
+      var el = wrapLines(ctx, d.egg, maxW - 60, 3);
+      var boxH = el.length * 36 + 56;
+      ctx.fillStyle = rgba(accent, 0.10);
+      roundRect(ctx, x - 14, y - 4, maxW + 28, boxH, 16);
+      ctx.fill();
+      ctx.strokeStyle = rgba(accent, 0.24);
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, x - 14, y - 4, maxW + 28, boxH, 16);
+      ctx.stroke();
+      ctx.fillStyle = accent;
+      ctx.font = '600 18px ' + fontBody;
+      ctx.fillText('彩 蛋', x + 4, y + 30);
+      y += 66;
+      ctx.fillStyle = bodyText;
+      ctx.font = '400 24px ' + fontBody;
+      el.forEach(function(l){ ctx.fillText(l, x + 4, y); y += 36; });
+      y += 16;
+    }
+
+    return y;
+  }
+
+  function drawPoster(){
+    var W = 720, H = 1280;
+    var c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    var ctx = c.getContext('2d');
+    var t = DATA.theme || {};
+    var bg = t.card || '#1a1522';
+    var base = t.bg || '#0b0910';
+    var accent = t.accent || '#d3b170';
+    var muted = t.muted || '#a79c93';
+    var fontBody = '"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif';
+
+    /* 背景 */
+    var g = ctx.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, bg); g.addColorStop(1, base);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    var rg = ctx.createRadialGradient(W / 2, 0, 40, W / 2, 0, 640);
+    rg.addColorStop(0, rgba(accent, 0.20));
+    rg.addColorStop(1, rgba(accent, 0));
+    ctx.fillStyle = rg; ctx.fillRect(0, 0, W, 700);
+
+    /* 两遍绘制：先量高度，再垂直居中画 */
+    var probe = document.createElement('canvas').getContext('2d');
+    var contentH = paintContent(probe, W, 0);
+    var top = Math.max(104, Math.min((H - contentH) / 2 + 10, H - 96 - contentH));
+    paintContent(ctx, W, top);
+
+    /* 边框 + 水印最后画 */
+    ctx.strokeStyle = rgba(accent, 0.34);
+    ctx.lineWidth = 2;
+    roundRect(ctx, 26, 26, W - 52, H - 52, 34);
+    ctx.stroke();
+    ctx.fillStyle = muted;
+    ctx.globalAlpha = .72;
+    ctx.font = '400 19px ' + fontBody;
+    ctx.textAlign = 'center';
+    ctx.fillText('仅供娱乐 · 不构成任何专业评估', W / 2, H - 52);
+    ctx.globalAlpha = 1;
+
+    return c;
+  }
+
+  function savePoster(){
+    try{
+      var c = drawPoster();
+      var url = c.toDataURL('image/png');
+      var a = document.createElement('a');
+      var safe = (DATA.meta && DATA.meta.title ? DATA.meta.title : 'result').replace(/[\\/:*?"<>|\s]/g, '');
+      a.download = safe + '-' + lastResult.result.name + '.png';
+      a.href = url;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toast('海报已保存，可直接发小红书');
+      if(window.HERMES_TEST) window.HERMES_TEST.posterSize = c.width + 'x' + c.height;
+    }catch(err){
+      toast('生成失败，请截图保存');
+      console.error(err);
+    }
+  }
+
+  /* ---------- 复制文案 ---------- */
+  function copyText(){
+    var d = lastResult.result;
+    var lines = [
+      '『' + (m.title || '') + '』',
+      '我测出来是：' + d.emoji + ' ' + d.name + '｜' + d.tag,
+      '匹配度 ' + lastResult.pct + '%',
+      d.quote,
+      (d.traits || []).map(function(t){ return '· ' + t; }).join('\n'),
+      '你也来测测？'
+    ];
+    var text = lines.filter(Boolean).join('\n');
+    var done = function(){ toast('文案已复制'); };
+    var fail = function(){
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try{ document.execCommand('copy'); done(); }
+      catch(e){ toast('复制失败，请手动选择'); }
+      document.body.removeChild(ta);
+    };
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+    }else{ fail(); }
+  }
+
+  /* ---------- 事件 ---------- */
+  $('#btn-start').addEventListener('click', function(){
+    idx = 0;
+    answers = new Array(QS.length).fill(null);
+    show('quiz');
+    renderQuestion();
+  });
+  $('#btn-prev').addEventListener('click', function(){
+    if(idx > 0){ idx--; renderQuestion(); }
+  });
+  $('#btn-again').addEventListener('click', function(){
+    idx = 0;
+    answers = new Array(QS.length).fill(null);
+    show('intro');
+  });
+  $('#btn-save').addEventListener('click', savePoster);
+  $('#btn-copy').addEventListener('click', copyText);
+
+  show('intro');
+
+  /* 键盘操作：A/B/C/D 或 1-4 选择 */
+  document.addEventListener('keydown', function(e){
+    if(!$('#v-quiz').classList.contains('active') || locked) return;
+    var k = e.key.toUpperCase();
+    var i = 'ABCD'.indexOf(k);
+    if(i < 0 && '1234'.indexOf(k) >= 0) i = parseInt(k, 10) - 1;
+    if(i >= 0 && i < QS[idx].options.length) choose(i);
+  });
+
+  /* 便于自动化校验 */
+  window.HERMES_TEST = {
+    data: DATA,
+    answerAll: function(optionIndex){
+      var self = this;
+      for(var i = 0; i < QS.length; i++){
+        answers[i] = optionIndex;
+      }
+      idx = QS.length - 1;
+      finish();
+    },
+    computeFor: function(picks){
+      answers = picks.slice();
+      return computeScore();
+    },
+    poster: drawPoster
+  };
+})();
+</script>
+</body>
+</html>
